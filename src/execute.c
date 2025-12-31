@@ -7,6 +7,7 @@
 
 char *builtin_names[] = {
     "exit",
+    "echo",
     NULL
 };
 
