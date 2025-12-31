@@ -1,14 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include "shell.h"
+
+char *builtin_names[] = {
+    "exit",
+    NULL
+};
 
 int execute_binary(char **args);
 
 int shell_execute(char **args) {
     if (args == NULL) {
         return 1;
+    }
+
+    for (int i = 0; builtin_names[i] != NULL; i++) {
+        if (!strcmp(args[0], builtin_names[i])) {
+            return execute_builtin(args, i);
+        }
     }
 
     return execute_binary(args);
