@@ -74,9 +74,30 @@ int shell_pwd(environment_var *env) {
 }
 
 int shell_cd(environment_var *env) {
-    struct stat statbuf;
+    if (env->args[1] == NULL) {
+        if (chdir(env->home_dir) != 0) {
+            perror("cd");
+        }
+        return 1;
+    }
 
-    if (stat(env->args[1], &statbuf) != 0) {
+    struct stat statbuf;
+    char *path = NULL;
+
+    if (env->args[1][0] == '~') {
+        path = malloc(strlen(env->home_dir) + strlen(env->args[1]));
+        if (path == NULL) {
+            fprintf(stderr, "shell: Memory allocation error\n");
+            return 1;
+        }
+
+        sprintf(path, "%s%s", env->home_dir, &env->args[1][1]);
+        fprintf(stderr, "%s\n", path);
+    } else {
+        path = env->args[1];
+    }
+
+    if (stat(path, &statbuf) != 0) {
         perror("cd");
         return 1;
     }
@@ -86,9 +107,14 @@ int shell_cd(environment_var *env) {
         return 1;
     }
 
-    if (chdir(env->args[1]) != 0) {
+
+    if (chdir(path) != 0) {
         perror("cd");
     }
 
+    if (!strcmp(path, env->args[1]))
+        return 1;
+
+    free(path);
     return 1;
 }
