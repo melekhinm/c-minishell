@@ -5,9 +5,10 @@
 #include <sys/wait.h>
 #include "shell.h"
 
-char *builtin_names[] = {
+const char *builtin_names[] = {
     "exit",
     "echo",
+    "type",
     NULL
 };
 
