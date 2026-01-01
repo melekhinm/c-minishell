@@ -9,6 +9,7 @@ const char *builtin_names[] = {
     "exit",
     "echo",
     "type",
+    "pwd",
     NULL
 };
 

@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "shell.h"
 
 int shell_exit();
 int shell_echo(environment_var *env);
 int shell_type(environment_var *env);
+int shell_pwd();
 
 int (*builtin_functions[]) (environment_var *env) = {
     &shell_exit,
     &shell_echo,
-    &shell_type
+    &shell_type,
+    &shell_pwd
 };
 
 int execute_builtin(environment_var *env, int id) {
@@ -52,5 +55,14 @@ int shell_type(environment_var *env) {
 
     printf("%s: not found\n", env->args[1]);
 
+    return 1;
+}
+
+int shell_pwd() {
+    char *pwd = getcwd(NULL, 0);
+
+    printf("%s\n", pwd);
+
+    free(pwd);
     return 1;
 }
