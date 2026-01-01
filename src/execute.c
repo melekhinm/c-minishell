@@ -19,14 +19,12 @@ int shell_execute(environment_var *env) {
         return 1;
     }
 
-    fprintf(stderr, "checking for builtins: %s\n", env->args[0]);
     for (int i = 0; builtin_names[i] != NULL; i++) {
         if (!strcmp(env->args[0], builtin_names[i])) {
             return execute_builtin(env, i);
         }
     }
 
-    fprintf(stderr, "found none\n");
     return execute_binary(env->args);
 }
 

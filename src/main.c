@@ -22,8 +22,6 @@ int main() {
         env->line = readline("$ ");
         parse_line(env);
         parse_path(env);
-
-        fprintf(stderr, "%s\n", env->full_path);
         status = shell_execute(env);
 
         free_env(env);

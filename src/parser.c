@@ -16,29 +16,32 @@ void parse_line(environment_var *env) {
         return;
     }
     int position = 0;
-    env->args[position++] = strdup(env->line);
+    char *current_token = NULL;
 
     // Parsing loop
-    for (int i = 0; i < length; i++) {
-        // If met a whitespace, we can place a NULL terminator
-        if (isspace(env->line[i])) {
-            env->line[i] = '\0';
-            // If the second char isn't whitespace, we add an argument
-            if (!isspace(env->line[i + 1])) {
-                env->args[position++] = strdup(&env->line[i + 1]);
+    for (int i = 0; i <= length; i++) {
+        char c = env->line[i];
 
-                // Overflow handling
-                if (position >= bufsize) {
-                    bufsize += ARGS_SIZE;
-                    char **temp = realloc(env->args, sizeof(char *) * bufsize);
-                    if (temp == NULL) {
-                        fprintf(stderr, "shell: Memory allocation error");
-                        free(env->args);
-                        env->args = NULL;
-                        return;
-                    }
-                    env->args = temp;
+        if (!isspace(c) && c != '\0' && current_token == NULL)
+            current_token = &env->line[i];
+
+        // If met a whitespace, we can place a NULL terminator
+        else if ((isspace(c) || c == '\0') && current_token != NULL) {
+            env->line[i] = '\0';
+            env->args[position++] = strdup(current_token);
+            current_token = NULL;
+
+            // Overflow handling
+            if (position >= bufsize) {
+                bufsize += ARGS_SIZE;
+                char **temp = realloc(env->args, sizeof(char *) * bufsize);
+                if (temp == NULL) {
+                    fprintf(stderr, "shell: Memory allocation error");
+                    free(env->args);
+                    env->args = NULL;
+                    return;
                 }
+                env->args = temp;
             }
         }
     }
