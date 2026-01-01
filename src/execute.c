@@ -10,6 +10,7 @@ const char *builtin_names[] = {
     "echo",
     "type",
     "pwd",
+    "cd",
     NULL
 };
 

@@ -2,25 +2,29 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "shell.h"
 
-int shell_exit();
+int shell_exit(environment_var *env);
 int shell_echo(environment_var *env);
 int shell_type(environment_var *env);
-int shell_pwd();
+int shell_pwd(environment_var *env);
+int shell_cd(environment_var *env);
 
 int (*builtin_functions[]) (environment_var *env) = {
     &shell_exit,
     &shell_echo,
     &shell_type,
-    &shell_pwd
+    &shell_pwd,
+    &shell_cd
 };
 
 int execute_builtin(environment_var *env, int id) {
     return (*builtin_functions[id]) (env);
 }
 
-int shell_exit() {
+int shell_exit(environment_var *env) {
+    (void) env;
     return 0;
 }
 
@@ -58,11 +62,33 @@ int shell_type(environment_var *env) {
     return 1;
 }
 
-int shell_pwd() {
+int shell_pwd(environment_var *env) {
+    (void)env;
+
     char *pwd = getcwd(NULL, 0);
 
     printf("%s\n", pwd);
 
     free(pwd);
+    return 1;
+}
+
+int shell_cd(environment_var *env) {
+    struct stat statbuf;
+
+    if (stat(env->args[1], &statbuf) != 0) {
+        perror("cd");
+        return 1;
+    }
+
+    if (S_ISDIR(statbuf.st_mode) == 0) {
+        printf("cd: %s: No such file or directory\n", env->args[1]);
+        return 1;
+    }
+
+    if (chdir(env->args[1]) != 0) {
+        perror("cd");
+    }
+
     return 1;
 }
