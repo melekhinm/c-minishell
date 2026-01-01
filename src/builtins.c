@@ -4,46 +4,46 @@
 #include "shell.h"
 
 int shell_exit();
-int shell_echo(char **args);
-int shell_type(char **args);
+int shell_echo(environment_var *env);
+int shell_type(environment_var *env);
 
-int (*builtin_functions[]) (char **) = {
+int (*builtin_functions[]) (environment_var *env) = {
     &shell_exit,
     &shell_echo,
     &shell_type
 };
 
-int execute_builtin(char **args, int id) {
-    return (*builtin_functions[id]) (args);
+int execute_builtin(environment_var *env, int id) {
+    return (*builtin_functions[id]) (env);
 }
 
 int shell_exit() {
     return 0;
 }
 
-int shell_echo(char **args) {
-    for (int i = 1; args[i] != NULL; i++) {
+int shell_echo(environment_var *env) {
+    for (int i = 1; env->args[i] != NULL; i++) {
         if (i > 1)
             printf(" ");
-        printf("%s", args[i]);
+        printf("%s", env->args[i]);
     }
     printf("\n");
 
     return 1;
 }
 
-int shell_type(char **args) {
-    if (args[1] == NULL)
+int shell_type(environment_var *env) {
+    if (env->args[1] == NULL)
         return 1;
 
     for (int i = 0; builtin_names[i] != NULL; i++) {
-        if (!strcmp(builtin_names[i], args[1])) {
-            printf("%s is a shell builtin\n", args[1]);
+        if (!strcmp(builtin_names[i], env->args[1])) {
+            printf("%s is a shell builtin\n", env->args[1]);
             return 1;
         }
     }
 
-    printf("%s: not found\n", args[1]);
+    printf("%s: not found\n", env->args[1]);
 
     return 1;
 }

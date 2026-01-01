@@ -14,18 +14,18 @@ const char *builtin_names[] = {
 
 int execute_binary(char **args);
 
-int shell_execute(char **args) {
-    if (args == NULL) {
+int shell_execute(environment_var *env) {
+    if (env->args == NULL) {
         return 1;
     }
 
     for (int i = 0; builtin_names[i] != NULL; i++) {
-        if (!strcmp(args[0], builtin_names[i])) {
-            return execute_builtin(args, i);
+        if (!strcmp(env->args[0], builtin_names[i])) {
+            return execute_builtin(env, i);
         }
     }
 
-    return execute_binary(args);
+    return execute_binary(env->args);
 }
 
 int execute_binary(char **args) {
