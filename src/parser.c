@@ -15,7 +15,7 @@ void parse_line(environment_var *env) {
         return;
     }
     int position = 0;
-    env->args[position++] = env->line;
+    env->args[position++] = strdup(env->line);
 
     // Parsing loop
     for (int i = 0; i < length; i++) {
@@ -24,7 +24,7 @@ void parse_line(environment_var *env) {
             env->line[i] = '\0';
             // If the second char isn't whitespace, we add an argument
             if (!isspace(env->line[i + 1])) {
-                env->args[position++] = &env->line[i + 1];
+                env->args[position++] = strdup(&env->line[i + 1]);
 
                 // Overflow handling
                 if (position >= bufsize) {

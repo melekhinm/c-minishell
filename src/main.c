@@ -3,6 +3,9 @@
 #include <readline/readline.h>
 #include "shell.h"
 
+void free_env(environment_var *env);
+void free_string_array(char **strings);
+
 int main() {
     int status;
 
@@ -20,7 +23,41 @@ int main() {
         parse_line(env);
         status = shell_execute(env);
 
-        free(env->line);
-        free(env->args);
+        free_env(env);
     } while (status);
+
+    free(env);
+}
+
+void free_env(environment_var *env) {
+    if (env == NULL)
+        return;
+
+    if (env->args != NULL) {
+        free_string_array(env->args);
+        free(env->args);
+        env->args = NULL;
+    }
+
+    if (env->path_dirs != NULL) {
+        free_string_array(env->path_dirs);
+        free(env->path_dirs);
+        env->path_dirs = NULL;
+    }
+
+    if (env->line != NULL) {
+        free(env->line);
+        env->line = NULL;
+    }
+
+    if (env->home_dir != NULL) {
+        free(env->home_dir);
+        env->home_dir = NULL;
+    }
+}
+
+void free_string_array(char **strings) {
+    for (int i = 0; strings[i] != NULL; i++) {
+        free(strings[i]);
+    }
 }
