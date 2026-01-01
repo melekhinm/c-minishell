@@ -15,13 +15,13 @@ int main() {
         exit(1);
     }
 
-    env->full_path = NULL;
-
+    // TODO: Consider freeing home_dir and path_env AFTER the loop to
+    // avoid adding unnecessary performance overhead.
     do {
         env->home_dir = strdup(getenv("HOME"));
+        env->path_env = strdup(getenv("PATH"));
         env->line = readline("$ ");
         parse_line(env);
-        parse_path(env);
         status = shell_execute(env);
 
         free_env(env);
@@ -50,9 +50,9 @@ void free_env(environment_var *env) {
         env->home_dir = NULL;
     }
 
-    if (env->full_path != NULL) {
-        free(env->full_path);
-        env->full_path = NULL;
+    if (env->path_env != NULL) {
+        free(env->path_env);
+        env->path_env = NULL;
     }
 }
 

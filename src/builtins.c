@@ -33,7 +33,7 @@ int shell_echo(environment_var *env) {
 }
 
 int shell_type(environment_var *env) {
-    if (env->args[0] == NULL)
+    if (env->args[1] == NULL)
         return 1;
 
     for (int i = 0; builtin_names[i] != NULL; i++) {
@@ -41,6 +41,13 @@ int shell_type(environment_var *env) {
             printf("%s is a shell builtin\n", env->args[1]);
             return 1;
         }
+    }
+
+    char *full_path = locate_executable(env->path_env, env->args[1]);
+    if (full_path != NULL) {
+        printf("%s is %s\n", env->args[1], full_path);
+        free(full_path);
+        return 1;
     }
 
     printf("%s: not found\n", env->args[1]);

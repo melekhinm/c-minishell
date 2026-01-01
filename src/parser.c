@@ -49,22 +49,21 @@ void parse_line(environment_var *env) {
     env->args[position] = NULL;
 }
 
-void parse_path(environment_var *env) {
-    if (env->args[0] == NULL) {
-        return;
+char *locate_executable(char *path_env, char *file) {
+    if (file == NULL) {
+        return NULL;
     }
 
-    char *path_string = strdup(getenv("PATH"));
+    char *path_string = strdup(path_env);
     char *dir = strtok(path_string, ":");
-    char *path_buffer = malloc(strlen(env->args[0]) + strlen(path_string) + 2);
+    char *path_buffer = malloc(strlen(file) + strlen(path_string) + 2);
 
     while (dir != NULL) {
-        sprintf(path_buffer, "%s/%s", dir, env->args[0]);
+        sprintf(path_buffer, "%s/%s", dir, file);
 
         if (access(path_buffer, F_OK | X_OK) == 0) {
-            env->full_path = path_buffer;
             free(path_string);
-            return;
+            return path_buffer;
         }
 
         dir = strtok(NULL, ":");
@@ -72,5 +71,5 @@ void parse_path(environment_var *env) {
 
     free(path_buffer);
     free(path_string);
-    env->full_path = NULL;
+    return NULL;
 }
