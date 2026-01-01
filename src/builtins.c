@@ -33,7 +33,7 @@ int shell_echo(environment_var *env) {
 }
 
 int shell_type(environment_var *env) {
-    if (env->args[1] == NULL)
+    if (env->args[0] == NULL)
         return 1;
 
     for (int i = 0; builtin_names[i] != NULL; i++) {

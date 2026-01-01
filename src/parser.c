@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "shell.h"
 
 #define ARGS_SIZE 16
@@ -43,4 +44,30 @@ void parse_line(environment_var *env) {
     }
 
     env->args[position] = NULL;
+}
+
+void parse_path(environment_var *env) {
+    if (env->args[0] == NULL) {
+        return;
+    }
+
+    char *path_string = strdup(getenv("PATH"));
+    char *dir = strtok(path_string, ":");
+    char *path_buffer = malloc(strlen(env->args[0]) + strlen(path_string) + 2);
+
+    while (dir != NULL) {
+        sprintf(path_buffer, "%s/%s", dir, env->args[0]);
+
+        if (access(path_buffer, F_OK | X_OK) == 0) {
+            env->full_path = path_buffer;
+            free(path_string);
+            return;
+        }
+
+        dir = strtok(NULL, ":");
+    }
+
+    free(path_buffer);
+    free(path_string);
+    env->full_path = NULL;
 }

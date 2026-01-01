@@ -15,12 +15,15 @@ int main() {
         exit(1);
     }
 
-    env->home_dir = NULL;
-    env->path_dirs = NULL;
+    env->full_path = NULL;
 
     do {
+        env->home_dir = strdup(getenv("HOME"));
         env->line = readline("$ ");
         parse_line(env);
+        parse_path(env);
+
+        fprintf(stderr, "%s\n", env->full_path);
         status = shell_execute(env);
 
         free_env(env);
@@ -39,12 +42,6 @@ void free_env(environment_var *env) {
         env->args = NULL;
     }
 
-    if (env->path_dirs != NULL) {
-        free_string_array(env->path_dirs);
-        free(env->path_dirs);
-        env->path_dirs = NULL;
-    }
-
     if (env->line != NULL) {
         free(env->line);
         env->line = NULL;
@@ -53,6 +50,11 @@ void free_env(environment_var *env) {
     if (env->home_dir != NULL) {
         free(env->home_dir);
         env->home_dir = NULL;
+    }
+
+    if (env->full_path != NULL) {
+        free(env->full_path);
+        env->full_path = NULL;
     }
 }
 
