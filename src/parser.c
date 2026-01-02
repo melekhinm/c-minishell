@@ -104,11 +104,7 @@ void remove_special_characters(char *string) {
     char *reader = string;
     char *writer = string;
 
-    fprintf(stderr, "assigner reader/writer\n");
-
     while (*reader != '\0') {
-        fprintf(stderr, "insider. state: %d, writer: %c, reader: %c\n",
-        current_state, *writer, *reader);
         switch (current_state)
         {
         case REMOVING_NOTHING:
