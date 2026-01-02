@@ -10,7 +10,9 @@
 typedef enum {
     REGULAR_PARSING,
     PARSING_SINGLE,
-    PARSING_DOUBLE
+    PARSING_DOUBLE,
+    ESCAPING_REGULAR,
+    ESCAPING_DOUBLE
 } parsing_state;
 
 typedef enum {
@@ -65,25 +67,37 @@ void parse_line(environment_var *env) {
                 }
             }
 
-            else if (c == '\'') {
+            else if (c == '\'')
                 current_state = PARSING_SINGLE;
-            }
 
-            else if (c == '\"') {
+            else if (c == '\"')
                 current_state = PARSING_DOUBLE;
-            }
+
+            else if (c == '\\')
+                current_state = ESCAPING_REGULAR;
+
             break;
         
         case PARSING_SINGLE:
-            if (c == '\'') {
+            if (c == '\'')
                 current_state = REGULAR_PARSING;
-            }
             break;
 
         case PARSING_DOUBLE:
+            if (c == '\"')
+                current_state = REGULAR_PARSING;
+            else if (c == '\\')
+                current_state = ESCAPING_DOUBLE;
+            break;
+        
+        case ESCAPING_REGULAR:
             current_state = REGULAR_PARSING;
             break;
         
+        case ESCAPING_DOUBLE:
+            current_state = PARSING_DOUBLE;
+            break;
+
         default:
             break;
         }
@@ -112,6 +126,11 @@ void remove_special_characters(char *string) {
                 current_state = REMOVING_SINGLE;
             else if (*reader == '\"')
                 current_state = REMOVING_DOUBLE;
+            else if (*reader == '\\') {
+                reader++;
+                *writer = *reader;
+                writer++;
+            }
             else {
                 *writer = *reader;
                 writer++;
@@ -130,6 +149,20 @@ void remove_special_characters(char *string) {
         case REMOVING_DOUBLE:
             if (*reader == '\"')
                 current_state = REMOVING_NOTHING;
+            else if (*reader == '\\') {
+                switch (*(reader + 1))
+                {
+                case '\\': case '\"': case '$': case '`':
+                    reader++;
+                    *writer = *reader;
+                    writer++;
+                    break;
+                default:
+                    *writer = *reader;
+                    writer++;
+                    break;
+                }
+            }
             else {
                 *writer = *reader;
                 writer++;
@@ -146,7 +179,7 @@ void remove_special_characters(char *string) {
 } 
 
 char *locate_executable(char *path_env, char *file) {
-    if (file == NULL) {
+    if (path_env == NULL || file == NULL) {
         return NULL;
     }
 
