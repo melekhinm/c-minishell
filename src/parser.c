@@ -7,6 +7,20 @@
 
 #define ARGS_SIZE 16
 
+typedef enum {
+    REGULAR_PARSING,
+    PARSING_SINGLE,
+    PARSING_DOUBLE
+} parsing_state;
+
+typedef enum {
+    REMOVING_NOTHING,
+    REMOVING_SINGLE,
+    REMOVING_DOUBLE
+} removal_state;
+
+void remove_special_characters(char *string);
+
 void parse_line(environment_var *env) {
     int bufsize = ARGS_SIZE;
     int length = strlen(env->line);
@@ -17,37 +31,123 @@ void parse_line(environment_var *env) {
     }
     int position = 0;
     char *current_token = NULL;
+    parsing_state current_state = REGULAR_PARSING;
 
-    // Parsing loop
     for (int i = 0; i <= length; i++) {
         char c = env->line[i];
 
-        if (!isspace(c) && c != '\0' && current_token == NULL)
-            current_token = &env->line[i];
-
-        // If met a whitespace, we can place a NULL terminator
-        else if ((isspace(c) || c == '\0') && current_token != NULL) {
-            env->line[i] = '\0';
-            env->args[position++] = strdup(current_token);
-            current_token = NULL;
-
-            // Overflow handling
-            if (position >= bufsize) {
-                bufsize += ARGS_SIZE;
-                char **temp = realloc(env->args, sizeof(char *) * bufsize);
-                if (temp == NULL) {
-                    fprintf(stderr, "shell: Memory allocation error");
-                    free(env->args);
-                    env->args = NULL;
-                    return;
-                }
-                env->args = temp;
+        switch (current_state) {
+        case REGULAR_PARSING:
+            if (!isspace(c) && c != '\0' && current_token == NULL) {
+                current_token = &env->line[i];
+                if (c == '\'')
+                    current_state = PARSING_SINGLE;
+                else if (c == '\"')
+                    current_state = PARSING_DOUBLE;
             }
+
+            else if ((isspace(c) || c == '\0') && current_token != NULL) {
+                env->line[i] = '\0';
+                env->args[position++] = strdup(current_token);
+                remove_special_characters(env->args[position - 1]);
+                current_token = NULL;
+
+                if (position >= bufsize) {
+                    bufsize += ARGS_SIZE;
+                    char **temp = realloc(env->args, sizeof(char *) * bufsize);
+                    if (temp == NULL) {
+                        fprintf(stderr, "shell: Memory allocation error");
+                        free(env->args);
+                        env->args = NULL;
+                        return;
+                    }
+                    env->args = temp;
+                }
+            }
+
+            else if (c == '\'') {
+                current_state = PARSING_SINGLE;
+            }
+
+            else if (c == '\"') {
+                current_state = PARSING_DOUBLE;
+            }
+            break;
+        
+        case PARSING_SINGLE:
+            if (c == '\'') {
+                current_state = REGULAR_PARSING;
+            }
+            break;
+
+        case PARSING_DOUBLE:
+            current_state = REGULAR_PARSING;
+            break;
+        
+        default:
+            break;
         }
+
+    }
+
+    if (current_state != REGULAR_PARSING) {
+        env->args[position++] = strdup(current_token);
+        current_token = NULL;
     }
 
     env->args[position] = NULL;
 }
+
+void remove_special_characters(char *string) {
+    removal_state current_state = REMOVING_NOTHING;
+
+    char *reader = string;
+    char *writer = string;
+
+    fprintf(stderr, "assigner reader/writer\n");
+
+    while (*reader != '\0') {
+        fprintf(stderr, "insider. state: %d, writer: %c, reader: %c\n",
+        current_state, *writer, *reader);
+        switch (current_state)
+        {
+        case REMOVING_NOTHING:
+            if (*reader == '\'')
+                current_state = REMOVING_SINGLE;
+            else if (*reader == '\"')
+                current_state = REMOVING_DOUBLE;
+            else {
+                *writer = *reader;
+                writer++;
+            }
+            break;
+        
+        case REMOVING_SINGLE:
+            if (*reader == '\'')
+                current_state = REMOVING_NOTHING;
+            else {
+                *writer = *reader;
+                writer++;
+            }
+            break;
+        
+        case REMOVING_DOUBLE:
+            if (*reader == '\"')
+                current_state = REMOVING_NOTHING;
+            else {
+                *writer = *reader;
+                writer++;
+            }
+            break;
+
+        default:
+            break;
+        }
+
+        reader++;
+    }
+    *writer = '\0';
+} 
 
 char *locate_executable(char *path_env, char *file) {
     if (file == NULL) {
