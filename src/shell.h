@@ -1,11 +1,21 @@
 #ifndef SHELL_CONTROLLER_H
 #define SHELL_CONTROLLER_H
 
+typedef enum {
+    NOT_REDIRECTING,
+    WRITING_STDOUT,
+    WRITING_STDERR,
+    APPENDING_STDOUT,
+    APPENDING_STDERR
+} redirection_state;
+
 typedef struct {
     char *home_dir;
     char *path_env;
     char *line;
     char **args;
+    char *ofile;
+    redirection_state redirection;
 } environment_var;
 
 
