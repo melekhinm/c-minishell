@@ -14,12 +14,14 @@ int main() {
         fprintf(stderr, "shell: Could not start\n");
         exit(1);
     }
+    env->ofile = NULL;
 
     // TODO: Consider freeing home_dir and path_env AFTER the loop to
     // avoid adding unnecessary performance overhead.
     do {
         env->home_dir = strdup(getenv("HOME"));
         env->path_env = strdup(getenv("PATH"));
+        env->redirection = NOT_REDIRECTING;
         env->line = readline("$ ");
         parse_line(env);
         status = shell_execute(env);
@@ -53,6 +55,11 @@ void free_env(environment_var *env) {
     if (env->path_env != NULL) {
         free(env->path_env);
         env->path_env = NULL;
+    }
+
+    if (env->ofile != NULL) {
+        free(env->ofile);
+        env->ofile = NULL;
     }
 }
 
