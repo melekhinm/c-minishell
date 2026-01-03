@@ -21,6 +21,21 @@ typedef enum {
     REMOVING_DOUBLE
 } removal_state;
 
+typedef struct {
+    const char *redir_string;
+    redirection_state state;
+} redirection_map;
+
+const redirection_map redir_array[] = {
+    {">", WRITING_STDOUT},
+    {"1>", WRITING_STDOUT},
+    {"2>", WRITING_STDERR},
+    {">>", APPENDING_STDOUT},
+    {"1>>", APPENDING_STDOUT},
+    {"2>>", APPENDING_STDERR},
+    {NULL, NOT_REDIRECTING}
+};
+
 void remove_special_characters(char *string);
 
 void parse_line(environment_var *env) {
@@ -34,6 +49,7 @@ void parse_line(environment_var *env) {
     int position = 0;
     char *current_token = NULL;
     parsing_state current_state = REGULAR_PARSING;
+    redirection_state current_redirection = NOT_REDIRECTING;
 
     for (int i = 0; i <= length; i++) {
         char c = env->line[i];
@@ -48,11 +64,43 @@ void parse_line(environment_var *env) {
                     current_state = PARSING_DOUBLE;
             }
 
+
+
             else if ((isspace(c) || c == '\0') && current_token != NULL) {
                 env->line[i] = '\0';
-                env->args[position++] = strdup(current_token);
-                remove_special_characters(env->args[position - 1]);
-                current_token = NULL;
+
+                /*
+                * NOTE:
+                * Consider implementing support for more than one redirect.
+                * For now, assumption is of redirecting once, and that outfile
+                * is the argument after the LAST redirection symbol. If looking
+                * at bash, the desirable effect seems to be creation of every
+                * file, but the output is indeed going to the last one ONLY.
+                */
+
+                if (current_redirection == NOT_REDIRECTING) {
+                    env->args[position++] = strdup(current_token);
+
+                    for (int i = 0; redir_array[i].redir_string != NULL; i++) {
+                        if (!strcmp(redir_array[i].redir_string,
+                            env->args[position - 1])) {
+                                current_redirection = redir_array[i].state;
+                                free(env->args[--position]);
+                            }
+                    }
+                
+                    if (current_redirection == NOT_REDIRECTING)
+                        remove_special_characters(env->args[position - 1]);
+                    current_token = NULL;
+                }
+
+                else {
+                    env->ofile = strdup(current_token);
+                    env->redirection = current_redirection;
+                    current_redirection = NOT_REDIRECTING;
+                    remove_special_characters(env->ofile);
+                    current_token = NULL;
+                }
 
                 if (position >= bufsize) {
                     bufsize += ARGS_SIZE;
