@@ -92,7 +92,6 @@ int shell_cd(environment_var *env) {
         }
 
         sprintf(path, "%s%s", env->home_dir, &env->args[1][1]);
-        fprintf(stderr, "%s\n", path);
     } else {
         path = env->args[1];
     }
