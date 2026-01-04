@@ -16,6 +16,8 @@ int main() {
     }
     env->ofile = NULL;
 
+    rl_attempted_completion_function = my_completion;
+
     // TODO: Consider freeing home_dir and path_env AFTER the loop to
     // avoid adding unnecessary performance overhead.
     do {

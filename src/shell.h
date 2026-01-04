@@ -25,5 +25,6 @@ void parse_line(environment_var *env);
 char *locate_executable(char *path_env, char *file);
 int shell_execute(environment_var *env);
 int execute_builtin(environment_var *env, int id);
+char **my_completion(const char *text, int start, int end);
 
 #endif
