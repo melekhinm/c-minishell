@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include "shell.h"
 
-const char *builtin_names[] = {
+char *builtin_names[] = {
     "exit",
     "echo",
     "type",
