@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 #include "shell.h"
 
 void free_env(environment_var *env);
@@ -25,6 +26,9 @@ int main() {
         env->path_env = strdup(getenv("PATH"));
         env->redirection = NOT_REDIRECTING;
         env->line = readline("$ ");
+        if (env->line != NULL) {
+            add_history(env->line);
+        }
         parse_line(env);
         status = shell_execute(env);
 
