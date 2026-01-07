@@ -32,10 +32,11 @@ int main() {
 
         char **pipes = check_for_pipeline(env->line);
         if (pipes != NULL) {
-            exit(1);
+            status = execute_pipelines(pipes, env);
+        } else {
+            parse_line(env);
+            status = shell_execute(env);
         }
-        parse_line(env);
-        status = shell_execute(env);
 
         free_env(env);
     } while (status);

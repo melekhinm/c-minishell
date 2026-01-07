@@ -73,5 +73,52 @@ char **check_for_pipeline(char *line) {
         fprintf(stderr, "%s\n", pipes[i]);
     }
     
+    if (position <= 1) {
+        for (int i = 0; pipes[i] != NULL; i++) {
+            free(pipes[i]);
+        }
+        free(pipes);
+        return NULL;
+    }
+
     return pipes;
+}
+
+/*THE LOGIC IS AS FOLLOWS:
+* FOR EACH PIPE CREATE IT'S OWN ENV
+* REDIRECT OUTPUT INPUT*/
+int execute_pipelines(char **pipes, environment_var *origin) {
+    int n_pipes = 0;
+    for (int i = 0; pipes[i] != NULL; i++)
+        n_pipes++;
+    environment_var *env_array[n_pipes];
+    //environment_var **env_array = malloc(sizeof(environment_var*) * n_pipes + 1);
+    int result;
+    for (int i = 0; i < n_pipes; i++) {
+        env_array[i] = malloc(sizeof(environment_var));
+        if (env_array[i] == NULL) {
+            fprintf(stderr, "shell: Memory allocation error\n");
+            return 1;
+        }
+        env_array[i]->line = pipes[i];
+        env_array[i]->path_env = origin->path_env;
+        env_array[i]->home_dir = origin->home_dir;
+        env_array[i]->args = NULL;
+        env_array[i]->ofile = NULL;
+        env_array[i]->redirection = NOT_REDIRECTING;
+
+        parse_line(env_array[i]);
+        result = shell_execute(env_array[i]);
+        free(env_array[i]);
+    }
+
+    for (int i = 0; pipes[i] != NULL; i++) {
+        free(pipes[i]);
+    }
+    free(pipes);
+
+    if (result != 0)
+        return result;
+    else
+        return 1;
 }
