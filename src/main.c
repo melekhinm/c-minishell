@@ -29,6 +29,11 @@ int main() {
         if (env->line != NULL) {
             add_history(env->line);
         }
+
+        char **pipes = check_for_pipeline(env->line);
+        if (pipes != NULL) {
+            exit(1);
+        }
         parse_line(env);
         status = shell_execute(env);
 
