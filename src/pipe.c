@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include "shell.h"
 
 typedef enum {
@@ -84,16 +85,11 @@ char **check_for_pipeline(char *line) {
     return pipes;
 }
 
-/*THE LOGIC IS AS FOLLOWS:
-* FOR EACH PIPE CREATE IT'S OWN ENV
-* REDIRECT OUTPUT INPUT*/
 int execute_pipelines(char **pipes, environment_var *origin) {
     int n_pipes = 0;
     for (int i = 0; pipes[i] != NULL; i++)
         n_pipes++;
     environment_var *env_array[n_pipes];
-    //environment_var **env_array = malloc(sizeof(environment_var*) * n_pipes + 1);
-    int result;
     for (int i = 0; i < n_pipes; i++) {
         env_array[i] = malloc(sizeof(environment_var));
         if (env_array[i] == NULL) {
@@ -108,7 +104,55 @@ int execute_pipelines(char **pipes, environment_var *origin) {
         env_array[i]->redirection = NOT_REDIRECTING;
 
         parse_line(env_array[i]);
-        result = shell_execute(env_array[i]);
+    }
+
+    int pipefd[2];
+    int prev_pipe_read = -1;
+    pid_t pipe_pids[n_pipes];
+
+    for (int i = 0; i < n_pipes; i++) {
+        if (i < n_pipes - 1) {
+            if (pipe(pipefd) == -1) {
+                perror("shell");
+                return 1;
+            }
+        }
+
+        pipe_pids[i] = fork();
+
+        if (pipe_pids[i] == 0) {
+            if (prev_pipe_read != -1) {
+                dup2(prev_pipe_read, STDIN_FILENO);
+                close(prev_pipe_read);
+            }
+
+            if (i < n_pipes - 1) {
+                dup2(pipefd[1], STDOUT_FILENO);
+                close(pipefd[1]);
+                close(pipefd[0]);
+            }
+
+            shell_execute(env_array[i]);
+            
+            exit(0); 
+        }
+
+        if (prev_pipe_read != -1) {
+            close(prev_pipe_read);
+        }
+
+        if (i < n_pipes - 1) {
+            prev_pipe_read = pipefd[0];
+            close(pipefd[1]);
+        }
+    }
+
+    for (int i = 0; i < n_pipes; i++) {
+        waitpid(pipe_pids[i], NULL, 0);
+    }
+
+    for (int i = 0; i < n_pipes; i++) {
+        free(env_array[i]->args);
         free(env_array[i]);
     }
 
@@ -117,8 +161,5 @@ int execute_pipelines(char **pipes, environment_var *origin) {
     }
     free(pipes);
 
-    if (result != 0)
-        return result;
-    else
-        return 1;
+    return 1;
 }
