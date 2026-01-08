@@ -70,10 +70,6 @@ char **check_for_pipeline(char *line) {
 
     pipes[position] = NULL;
 
-    for (int i = 0; pipes[i] != NULL; i++) {
-        fprintf(stderr, "%s\n", pipes[i]);
-    }
-    
     if (position <= 1) {
         for (int i = 0; pipes[i] != NULL; i++) {
             free(pipes[i]);
@@ -87,8 +83,9 @@ char **check_for_pipeline(char *line) {
 
 int execute_pipelines(char **pipes, environment_var *origin) {
     int n_pipes = 0;
-    for (int i = 0; pipes[i] != NULL; i++)
+    while (pipes[n_pipes] != NULL)
         n_pipes++;
+
     environment_var *env_array[n_pipes];
     for (int i = 0; i < n_pipes; i++) {
         env_array[i] = malloc(sizeof(environment_var));
@@ -97,8 +94,8 @@ int execute_pipelines(char **pipes, environment_var *origin) {
             return 1;
         }
         env_array[i]->line = pipes[i];
-        env_array[i]->path_env = origin->path_env;
-        env_array[i]->home_dir = origin->home_dir;
+        env_array[i]->path_env = strdup(origin->path_env);
+        env_array[i]->home_dir = strdup(origin->home_dir);
         env_array[i]->args = NULL;
         env_array[i]->ofile = NULL;
         env_array[i]->redirection = NOT_REDIRECTING;
@@ -152,12 +149,7 @@ int execute_pipelines(char **pipes, environment_var *origin) {
     }
 
     for (int i = 0; i < n_pipes; i++) {
-        free(env_array[i]->args);
-        free(env_array[i]);
-    }
-
-    for (int i = 0; pipes[i] != NULL; i++) {
-        free(pipes[i]);
+        free_env(env_array[i]);
     }
     free(pipes);
 
