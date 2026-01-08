@@ -150,6 +150,8 @@ int execute_pipelines(char **pipes, environment_var *origin) {
 
     for (int i = 0; i < n_pipes; i++) {
         free_env(env_array[i]);
+        free(env_array[i]->home_dir);
+        free(env_array[i]);
     }
     free(pipes);
 
