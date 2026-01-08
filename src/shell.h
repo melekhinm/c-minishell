@@ -29,5 +29,7 @@ char **my_completion(const char *text, int start, int end);
 char **check_for_pipeline(char *line);
 int execute_pipelines(char **pipes, environment_var *origin);
 void free_env(environment_var *env);
+void shell_read_history(char *home);
+void shell_write_history(char *home);
 
 #endif

@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <readline/history.h>
 #include "shell.h"
 
 int shell_exit(environment_var *env);
@@ -10,13 +12,15 @@ int shell_echo(environment_var *env);
 int shell_type(environment_var *env);
 int shell_pwd(environment_var *env);
 int shell_cd(environment_var *env);
+int shell_history(environment_var *env);
 
 int (*builtin_functions[]) (environment_var *env) = {
     &shell_exit,
     &shell_echo,
     &shell_type,
     &shell_pwd,
-    &shell_cd
+    &shell_cd,
+    &shell_history
 };
 
 int execute_builtin(environment_var *env, int id) {
@@ -115,5 +119,10 @@ int shell_cd(environment_var *env) {
         return 1;
 
     free(path);
+    return 1;
+}
+
+int shell_history(environment_var *env) {
+
     return 1;
 }

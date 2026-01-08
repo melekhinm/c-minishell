@@ -18,11 +18,12 @@ int main() {
     env->ofile = NULL;
 
     rl_attempted_completion_function = my_completion;
+    env->home_dir = strdup(getenv("HOME"));
+    shell_read_history(env->home_dir);
 
     // TODO: Consider freeing home_dir and path_env AFTER the loop to
     // avoid adding unnecessary performance overhead.
     do {
-        env->home_dir = strdup(getenv("HOME"));
         env->path_env = strdup(getenv("PATH"));
         env->redirection = NOT_REDIRECTING;
         env->line = readline("$ ");
@@ -41,6 +42,8 @@ int main() {
         free_env(env);
     } while (status);
 
+    shell_write_history(env->home_dir);
+    free(env->home_dir);
     free(env);
 }
 
@@ -57,11 +60,6 @@ void free_env(environment_var *env) {
     if (env->line != NULL) {
         free(env->line);
         env->line = NULL;
-    }
-
-    if (env->home_dir != NULL) {
-        free(env->home_dir);
-        env->home_dir = NULL;
     }
 
     if (env->path_env != NULL) {
