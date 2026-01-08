@@ -13,7 +13,7 @@ int main() {
     environment_var *env = malloc(sizeof(environment_var));
     if (env == NULL) {
         fprintf(stderr, "shell: Could not start\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     env->ofile = NULL;
 
@@ -43,6 +43,8 @@ int main() {
     shell_write_history(env->home_dir);
     free(env->home_dir);
     free(env);
+
+    exit(EXIT_SUCCESS);
 }
 
 void free_env(environment_var *env) {
