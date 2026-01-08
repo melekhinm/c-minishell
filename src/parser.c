@@ -43,7 +43,7 @@ void parse_line(environment_var *env) {
     int length = strlen(env->line);
     env->args = malloc(sizeof(char *) * bufsize);
     if (env->args == NULL) {
-        fprintf(stderr, "shell: Memory allocation error\n");
+        fprintf(stderr, "shell: parsing: Memory allocation error\n");
         return;
     }
     int position = 0;
@@ -106,7 +106,9 @@ void parse_line(environment_var *env) {
                     bufsize += ARGS_SIZE;
                     char **temp = realloc(env->args, sizeof(char *) * bufsize);
                     if (temp == NULL) {
-                        fprintf(stderr, "shell: Memory allocation error");
+                        fprintf(
+                            stderr, "shell: parsing: Memory allocation error"
+                        );
                         free(env->args);
                         env->args = NULL;
                         return;

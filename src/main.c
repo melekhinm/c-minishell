@@ -21,8 +21,6 @@ int main() {
     env->home_dir = strdup(getenv("HOME"));
     shell_read_history(env->home_dir);
 
-    // TODO: Consider freeing home_dir and path_env AFTER the loop to
-    // avoid adding unnecessary performance overhead.
     do {
         env->path_env = strdup(getenv("PATH"));
         env->redirection = NOT_REDIRECTING;

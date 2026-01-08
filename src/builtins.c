@@ -80,7 +80,7 @@ int shell_pwd(environment_var *env) {
 int shell_cd(environment_var *env) {
     if (env->args[1] == NULL) {
         if (chdir(env->home_dir) != 0) {
-            perror("cd");
+            perror("shell: cd");
         }
         return 1;
     }
@@ -101,18 +101,18 @@ int shell_cd(environment_var *env) {
     }
 
     if (stat(path, &statbuf) != 0) {
-        perror("cd");
+        perror("shell: cd");
         return 1;
     }
 
     if (S_ISDIR(statbuf.st_mode) == 0) {
-        printf("cd: %s: No such file or directory\n", env->args[1]);
+        printf("shell: cd: %s: No such file or directory\n", env->args[1]);
         return 1;
     }
 
 
     if (chdir(path) != 0) {
-        perror("cd");
+        perror("shell: cd");
     }
 
     if (!strcmp(path, env->args[1]))

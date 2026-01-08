@@ -53,10 +53,10 @@ int execute_binary(char **args) {
 
     if (pid == 0) {
         execvp(args[0], args);
-        perror("shell");
+        perror("shell: execution");
         exit(1);
     } else if (pid < 0) {
-        perror("shell");
+        perror("shell: execution");
     } else {
         do {
             waitpid(pid, &status, WUNTRACED);

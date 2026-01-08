@@ -19,7 +19,7 @@ char **check_for_pipeline(char *line) {
     int length = strlen(line);
     char **pipes = malloc(sizeof(char *) * bufsize);
     if (pipes == NULL) {
-        fprintf(stderr, "shell: Memory allocation error\n");
+        fprintf(stderr, "shell: pipe: Memory allocation error\n");
         return NULL;
     }
     char *current_token = NULL;
@@ -90,7 +90,7 @@ int execute_pipelines(char **pipes, environment_var *origin) {
     for (int i = 0; i < n_pipes; i++) {
         env_array[i] = malloc(sizeof(environment_var));
         if (env_array[i] == NULL) {
-            fprintf(stderr, "shell: Memory allocation error\n");
+            fprintf(stderr, "shell: pipe: Memory allocation error\n");
             return 1;
         }
         env_array[i]->line = pipes[i];
@@ -110,7 +110,7 @@ int execute_pipelines(char **pipes, environment_var *origin) {
     for (int i = 0; i < n_pipes; i++) {
         if (i < n_pipes - 1) {
             if (pipe(pipefd) == -1) {
-                perror("shell");
+                perror("shell: pipe");
                 return 1;
             }
         }
