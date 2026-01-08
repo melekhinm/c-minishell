@@ -27,7 +27,7 @@ void shell_write_history(char *home) {
     char *filename = get_history_filename(home);
     if (write_history(filename) != 0)
         perror("shell");
-    if (history_truncate_file(filename, 10))
+    if (history_truncate_file(filename, 1000) != 0)
         perror("shell");
 
     free(filename);

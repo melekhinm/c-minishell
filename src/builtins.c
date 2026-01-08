@@ -123,6 +123,11 @@ int shell_cd(environment_var *env) {
 }
 
 int shell_history(environment_var *env) {
+    (void) env;
+    HIST_ENTRY **current_history = history_list();
+    for (int i = 0; current_history[i] != NULL; i++) {
+        printf("%d  %s\n", i + 1, current_history[i]->line);
+    }
 
     return 1;
 }
