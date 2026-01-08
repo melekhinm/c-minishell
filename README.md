@@ -85,7 +85,7 @@ hello    world
 **Navigation**
 ```bash
 $ ls
-Makefile  outline.odt  README.md  shell  src
+LICENSE  Makefile  README.md  shell  src
 $ cd src/
 $ ls
 builtins.c    execute.c  main.c    pipe.c
