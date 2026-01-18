@@ -13,6 +13,7 @@ int shell_type(environment_var *env);
 int shell_pwd(environment_var *env);
 int shell_cd(environment_var *env);
 int shell_history(environment_var *env);
+int shell_help(environment_var *env);
 
 int (*builtin_functions[]) (environment_var *env) = {
     &shell_exit,
@@ -20,7 +21,8 @@ int (*builtin_functions[]) (environment_var *env) = {
     &shell_type,
     &shell_pwd,
     &shell_cd,
-    &shell_history
+    &shell_history,
+    &shell_help
 };
 
 int execute_builtin(environment_var *env, int id) {
@@ -128,6 +130,52 @@ int shell_history(environment_var *env) {
     for (int i = 0; current_history[i] != NULL; i++) {
         printf("%d  %s\n", i + 1, current_history[i]->line);
     }
+
+    return 1;
+}
+
+int shell_help(environment_var *env) {
+    (void) env;
+
+    printf("********************************************************************************");
+    printf("\n");
+    printf("*                                                                              *");
+    printf("\n");
+    printf("********************************SIMPLE C SHELL**********************************");
+    printf("* (C) Mikhail Melekhin                                                         *");
+    printf("\n");
+    printf("*                                                                              *");
+    printf("\n");
+    printf("*                                                                              *");
+    printf("\n");
+    printf("* General:                                                                     *");
+    printf("\n");
+    printf("* Simple shell, no different from bash, albeit a lot less advanced.            *");
+    printf("\n");
+    printf("*                                                                              *");
+    printf("\n");
+    printf("* Commands:                                                                    *");
+    printf("\n");
+    printf("* * exit - exits the program                                                   *");
+    printf("\n");
+    printf("* * help - prints out this message                                             *");
+    printf("\n");
+    printf("* * echo - redirects stdin to stdout                                           *");
+    printf("\n");
+    printf("* * type - show the type of a program                                          *");
+    printf("\n");
+    printf("* * pwd - WHERE AM I?                                                          *");
+    printf("\n");
+    printf("* * history - show commands history                                            *");
+    printf("\n");
+    printf("*                                                                              *");
+    printf("\n");
+    printf("* It, obviously, is able to execute files on your system, like 'clear'!        *");
+    printf("\n");
+    printf("*                                                                              *");
+    printf("\n");
+    printf("********************************************************************************");
+
 
     return 1;
 }

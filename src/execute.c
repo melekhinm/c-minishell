@@ -13,6 +13,7 @@ char *builtin_names[] = {
     "pwd",
     "cd",
     "history",
+    "help",
     NULL
 };
 
