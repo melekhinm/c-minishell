@@ -25,9 +25,12 @@ int main() {
         env->path_env = strdup(getenv("PATH"));
         env->redirection = NOT_REDIRECTING;
         env->line = readline("$ ");
-        if (env->line != NULL) {
-            add_history(env->line);
+        if (*env->line == '\0') {
+            free_env(env);
+            continue;
         }
+
+        add_history(env->line);
 
         char **pipes = check_for_pipeline(env->line);
         if (pipes != NULL) {
